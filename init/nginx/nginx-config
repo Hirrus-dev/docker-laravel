@@ -1,0 +1,10 @@
+server {
+        ## Your website name goes here.
+        server_name localhost.localdomain;
+        listen 80;
+        location ~ /.well-known/acme-challenge/ {
+                root /var/www/certbot;
+                allow all;
+        }
+        ## Your only path reference.
+}
