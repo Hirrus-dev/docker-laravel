@@ -52,6 +52,8 @@ ADD php.ini /usr/local/etc/php/conf.d/40-custom.ini
 
 RUN usermod -u 1000 www-data
 
+ADD .env /.env
+
 WORKDIR /var/www/localhost.localdomain/laravel
 
 CMD ["php-fpm"]
