@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -z $1 ]
+if [ $# -eq 1 ]
 then
 
     ssh_port=50142
@@ -106,6 +106,7 @@ then
     cp -r ./certbot ../certbot
 
     cd ~/docker-laravel/
+    cp ~/.env ~/docker-laravel/php-fpm
 
     docker-compose up -d
 
@@ -118,3 +119,4 @@ then
     sudo chmod 775 -R ./laravel
     sudo docker exec -it php bash -c "cp /.env /var/www/dockertest.databridge.website/laravel/.env"
     sudo docker exec -it php bash -c "composer update --no-scripts -d /var/www/dockertest.databridge.website/laravel/"
+fi
