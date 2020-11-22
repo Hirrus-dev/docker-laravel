@@ -32,10 +32,8 @@ cd ~/docker-laravel/
 
 docker-compose up -d
 
-mkdir ./nginx/public/laravel
-#cd ~/docker-laravel/scripts
-cd ./nginx/public/laravel
-#git init
+cd ~/docker-laravel/nginx/public/laravel
+git init
 #git pull git@github.com:Hirrus-dev/laravel.git 6.x
 #cd ../
 #chown -R www-data:www-data ./laravel

@@ -30,8 +30,7 @@ sudo chown -R $user:$group /home/$user
 usermod -aG sudo $user
 usermod -aG www-data $user
 
-sudo apt update &&\ 
-sudo apt -y upgrade
+sudo apt update && apt upgrade -y
 
 if [ -z $(which containerd) ]
   then
