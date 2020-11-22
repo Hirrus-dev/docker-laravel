@@ -9,7 +9,12 @@ if [ -z "$(grep -E "^$group:" /etc/group)" ]
           sudo groupadd $group
 fi
 
-#20 Create user mechanic with password mecanic
+if [ -z "$(grep -E "www-data:" /etc/group)" ]
+    then
+          sudo groupadd www-data
+fi
+
+#20 Create user mechanic with password mechanic
 if [ -z "$(grep -E "^$user:" /etc/passwd)" ]
   then
     sudo useradd $user -g $group -s /bin/bash -d /home/$user -p $(openssl passwd -6 mechanic)
@@ -23,6 +28,7 @@ fi
 sudo chown -R $user:$group /home/$user
 
 usermod -aG sudo $user
+usermod -aG www-data $user
 
 sudo apt update &&\ 
 sudo apt -y upgrade
@@ -58,8 +64,6 @@ sudo chmod 600 /swapfile
 mkswap /swapfile
 swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-
-#git clone https://github.com/Hirrus-dev/docker-laravel.git
 
 #10 Change ssh port
 #sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config

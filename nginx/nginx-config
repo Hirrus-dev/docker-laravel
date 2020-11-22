@@ -5,27 +5,27 @@ upstream php {
 server {
         listen 80;
 
-        server_name localhost.localdomian;
+        server_name localhost.localdomain;
         location ~ /.well-known/acme-challenge {
                 allow all; 
                 root /var/www/certbot;
         }
 
         #redirect http to https
-        return 301 https://localhost.localdomian$request_uri;
+        return 301 https://localhost.localdomain$request_uri;
 }
 
 server {
         ## Your website name goes here.
-        server_name localhost.localdomian;
+        server_name ocalhost.localdomain;
         listen 443 ssl http2;
 
         # SSL code
-        ssl_certificate /etc/nginx/ssl/live/localhost.localdomian/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/live/localhost.localdomian/privkey.pem;
+        ssl_certificate /etc/nginx/ssl/live/localhost.localdomain/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/live/localhost.localdomain/privkey.pem;
 
-        #root /var/www/localhost.localdomian;
-        root /var/www/localhost.localdomian/laravel/public;
+        #root /var/www/localhost.localdomain;
+        root /var/www/localhost.localdomain/laravel/public;
 
         location / {
                 index index.php;

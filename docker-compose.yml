@@ -21,7 +21,7 @@ services:
     container_name: php
     restart: unless-stopped
     volumes:
-      - ./nginx/public:/var/www/localhost.localdomian
+      - ./nginx/public:/var/www/localhost.localdomain
 
   web:
     image: nginx:alpine
@@ -32,7 +32,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx-config:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/public:/var/www/localhost.localdomian
+      - ./nginx/public:/var/www/localhost.localdomain
       - ./certbot/conf:/etc/nginx/ssl
       - ./certbot/data:/var/www/certbot
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
@@ -49,4 +49,4 @@ services:
 
 volumes:
   db:
-  web:
+#  web:
