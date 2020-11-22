@@ -19,7 +19,7 @@ services:
   certbot:
     image: certbot/certbot
     container_name: certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email ivanov.alexy.666@gmail.com --agree-tos --no-eff-email -d localhost.localdomain
+    command: certonly --webroot --webroot-path=/var/www/certbot --email your_mail@gmail.com --agree-tos --no-eff-email -d localhost.localdomain
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/logs:/var/log/letsencrypt
