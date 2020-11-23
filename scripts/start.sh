@@ -59,12 +59,30 @@ then
             systemctl start docker
     fi
 
+
+    sudo mkdir -p ~/.ssh/github
+    sudo chmod 700 ~/.ssh ~/.ssh/github
+    sudo mv ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
+    sudo chown $USER: ~/.ssh/github/id_rsa
+    sudo touch ~/.ssh/config
+    sudo chmod 600 ~/.ssh/config
+    cat << EOF | sudo tee ~/.ssh/config > /dev/null
+    Host github.com
+        IdentityFile ~/.ssh/github/id_rsa
+EOF
+
     #70 SWAPfile
     sudo fallocate -l 1.5G /swapfile
     sudo chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
-    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+    if [ -z "$(grep -E "/swapfile none swap sw 0 0" /etc/fstab)" ]
+        then
+            echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    fi
+
+    
 
     #10 Change ssh port
     sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config
@@ -106,7 +124,7 @@ then
     cp -r ./certbot ../certbot
 
     cd ~/docker-laravel/
-    cp ~/.env ~/docker-laravel/php-fpm
+    #cp ~/.env ~/docker-laravel/php-fpm
 
     docker-compose up -d
 
