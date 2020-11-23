@@ -64,6 +64,7 @@ then
     sudo chmod 700 ~/.ssh ~/.ssh/github
     sudo mv ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
     sudo chown $USER: ~/.ssh/github/id_rsa
+    sudo chmod 600 ~/.ssh/github/id_rsa
     sudo touch ~/.ssh/config
     sudo chmod 600 ~/.ssh/config
     cat << EOF | sudo tee ~/.ssh/config > /dev/null
