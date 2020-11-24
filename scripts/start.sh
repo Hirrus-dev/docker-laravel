@@ -71,15 +71,15 @@ then
 
     if [ -f ~/.ssh/github/id_rsa ]
         then
-            if ! [ -s ~/.ssh/github/id_rsa ]
+            if [ ! -s ~/.ssh/github/id_rsa ]
                 then
                     sudo rm -f ~/.ssh/github/id_rsa
             fi
     fi
 
-    if [ -f ~/docker-laravel/key/id_rsa ] && ! [ -f ~/.ssh/github/id_rsa ]
+    if   [ -f ~/docker-laravel/key/id_rsa ] && [ ! -f ~/.ssh/github/id_rsa ] 
         then    
-            if [ -s ~/.ssh/github/id_rsa ]
+            if [ -s ~/docker-laravel/key/id_rsa ]
                 then
                     sudo cp -f ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
                     rm ~/docker-laravel/key/id_rsa
@@ -158,7 +158,7 @@ EOF
 
     cd ~/docker-laravel/init
 
-    if ! [ -f ~/docker-laravel/certbot]
+    if [ ! -d ~/docker-laravel/certbot ]
         then
             sudo docker-compose up -d
             while [ -z $(sudo docker ps -a -q  --filter "status=exited" --filter "name=certbot_init") ]
@@ -175,14 +175,20 @@ EOF
 
     cd ~/docker-laravel/
     #cp ~/.env ~/docker-laravel/php-fpm
-    sudo docker stop $(sudo docker ps -a -q)
-    sudo docker rm $(sudo docker ps -a -q)
-    sudo docker rmi $(sudo docker images -q)
+    if [ -n "$(sudo docker ps -a -q)" ]
+        then
+            sudo docker stop $(sudo docker ps -a -q)
+            sudo docker rm $(sudo docker ps -a -q)
+    fi
+    if [ -n "$(sudo docker images -q)" ]
+        then
+            sudo docker rmi $(sudo docker images -q)
+    fi
 
     sudo docker-compose up -d
 
     cd ~/docker-laravel/nginx/public/laravel
-    if ! [ -s ~/docker-laravel/nginx/public/laravel ]
+    if [ ! -d ~/docker-laravel/nginx/public/laravel/public ]
         then
             git init
             git pull git@github.com:Hirrus-dev/laravel.git 6.x
