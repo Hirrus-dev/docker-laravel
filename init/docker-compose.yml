@@ -16,9 +16,9 @@ services:
       - ./certbot/data:/var/www/certbot
 #    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   
-  certbot:
+  certbot_init:
     image: certbot/certbot
-    container_name: certbot
+    container_name: certbot_init
     command: certonly --webroot --webroot-path=/var/www/certbot --email your_mail@gmail.com --agree-tos --no-eff-email -d localhost.localdomain
     volumes:
       - ./certbot/conf:/etc/letsencrypt
