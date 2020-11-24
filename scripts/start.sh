@@ -60,17 +60,63 @@ then
     fi
 
 
-    sudo mkdir -p ~/.ssh/github
+    if ! [ -d ~/.ssh/github ]
+        then
+            sudo mkdir -p ~/.ssh/github
+    fi
+    
     sudo chmod 700 ~/.ssh ~/.ssh/github
-    sudo mv ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
+
+    # Add private key for repo
+
+    if [ -f ~/.ssh/github/id_rsa ]
+        then
+            if ! [ -s ~/.ssh/github/id_rsa ]
+                then
+                    sudo rm -f ~/.ssh/github/id_rsa
+            fi
+    fi
+
+    if [ -f ~/docker-laravel/key/id_rsa ] && ! [ -f ~/.ssh/github/id_rsa ]
+        then    
+            if [ -s ~/.ssh/github/id_rsa ]
+                then
+                    sudo cp -f ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
+                    rm ~/docker-laravel/key/id_rsa
+                else
+                    echo "Private key file ~/docker-laravel/key/id_rsa is empty"
+            fi
+        else
+            echo "Not found file private key in ~/docker-laravel/key/id_rsa"
+    fi
+
+    if [ -f ~/.ssh/github/id_rsa ]
+        then
+            if ! [ -s ~/.ssh/github/id_rsa ]
+                then
+                    echo "Private key file ~/.ssh/github/id_rsa is empty"
+                    exit 0
+            fi
+        else
+            echo "Private key file ~/.ssh/github/id_rsa is absent"
+            exit 0
+    fi
+ 
+
     sudo chown $USER: ~/.ssh/github/id_rsa
     sudo chmod 600 ~/.ssh/github/id_rsa
-    sudo touch ~/.ssh/config
+    if ! [ -f ~/.ssh/config ]
+        then
+            sudo touch ~/.ssh/config
+    fi
     sudo chmod 600 ~/.ssh/config
-    cat << EOF | sudo tee ~/.ssh/config > /dev/null
+    if [ -z "$(grep -E "^Host github.com" ~/.ssh/config)" ]
+        then
+            cat << EOF | sudo tee ~/.ssh/config > /dev/null
     Host github.com
         IdentityFile ~/.ssh/github/id_rsa
 EOF
+    fi
 
     #70 SWAPfile
     sudo fallocate -l 1.5G /swapfile
@@ -112,26 +158,35 @@ EOF
 
     cd ~/docker-laravel/init
 
-    sudo docker-compose up -d
-    while [ -z $(sudo docker ps -a -q  --filter "status=exited" --filter "name=certbot") ]
-    do
-        sleep 1
-        echo waiting...
-    done
-    sudo docker-compose down
+    if ! [ -f ~/docker-laravel/certbot]
+        then
+            sudo docker-compose up -d
+            while [ -z $(sudo docker ps -a -q  --filter "status=exited" --filter "name=certbot_init") ]
+            do
+                sleep 1
+                echo waiting...
+            done
+            sudo docker-compose down
 
-    sudo docker rmi $(sudo docker images -q)
-    sudo docker volume rm $(sudo docker volume ls -q)
-    cp -r ./certbot ../certbot
+            sudo docker rmi $(sudo docker images -q)
+            sudo docker volume rm $(sudo docker volume ls -q)
+            cp -r ./certbot ../certbot
+    fi
 
     cd ~/docker-laravel/
     #cp ~/.env ~/docker-laravel/php-fpm
+    sudo docker stop $(sudo docker ps -a -q)
+    sudo docker rm $(sudo docker ps -a -q)
+    sudo docker rmi $(sudo docker images -q)
 
-    docker-compose up -d
+    sudo docker-compose up -d
 
     cd ~/docker-laravel/nginx/public/laravel
-    git init
-    git pull git@github.com:Hirrus-dev/laravel.git 6.x
+    if ! [ -s ~/docker-laravel/nginx/public/laravel ]
+        then
+            git init
+            git pull git@github.com:Hirrus-dev/laravel.git 6.x
+    fi
 
     cd ~/docker-laravel/nginx/public
     sudo chown -R www-data:www-data ./laravel
