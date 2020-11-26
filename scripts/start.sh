@@ -28,10 +28,32 @@ then
 
     if ! [ -d /home/$user ]
         then
-            sudo mkdir /home/$user/
+            sudo mkdir /home/$user
+    fi
+
+    if ! [ -d /home/$user/.ssh ]
+        then
+            sudo mkdir /home/$user/.ssh
+    fi
+
+    if ! [ -d /home/$user/.ssh/github ]
+        then
+            sudo mkdir -p ~/.ssh/github
+    fi
+    
+
+    if [ -f /home/$user/.ssh/authorized_keys ]
+        then
+            if [ -z "$(grep  "$(cat ~/docker-laravel/key/id_rsa.pub)" authorized_keys)" ]
+                then
+                    cat ~/docker-laravel/key/id_rsa.pub >> /home/$user/.ssh/authorized_keys
+            fi
+        else
+            cp ~/docker-laravel/key/id_rsa.pub /home/$user/.ssh/authorized_keys
     fi
 
     sudo chown -R $user:$group /home/$user
+    sudo chmod 700 ~/.ssh ~/.ssh/github
 
     usermod -aG sudo $user
     usermod -aG www-data $user
@@ -82,6 +104,7 @@ then
             if [ -s ~/docker-laravel/key/id_rsa ]
                 then
                     sudo cp -f ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
+                    sudo cp -f ~/docker-laravel/key/id_rsa /home/$user/.ssh/github/id_rsa
                     rm ~/docker-laravel/key/id_rsa
                 else
                     echo "Private key file ~/docker-laravel/key/id_rsa is empty"
@@ -105,6 +128,10 @@ then
 
     sudo chown $USER: ~/.ssh/github/id_rsa
     sudo chmod 600 ~/.ssh/github/id_rsa
+
+    sudo chown $user /home/$user/.ssh/github/id_rsa
+    sudo chmod 600 /home/$user/.ssh/github/id_rsa
+
     if ! [ -f ~/.ssh/config ]
         then
             sudo touch ~/.ssh/config
