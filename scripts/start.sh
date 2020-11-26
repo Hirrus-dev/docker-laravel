@@ -38,22 +38,22 @@ then
 
     if ! [ -d /home/$user/.ssh/github ]
         then
-            sudo mkdir -p ~/.ssh/github
+            sudo mkdir -p /home/$user/.ssh/github
     fi
     
 
     if [ -f /home/$user/.ssh/authorized_keys ]
         then
-            if [ -z "$(grep  "$(cat ~/docker-laravel/key/id_rsa.pub)" authorized_keys)" ]
+            if [ -z "$(grep  "$(cat /docker-laravel/key/id_rsa.pub)" /home/$user/.ssh/authorized_keys)" ]
                 then
-                    cat ~/docker-laravel/key/id_rsa.pub >> /home/$user/.ssh/authorized_keys
+                    cat /docker-laravel/key/id_rsa.pub >> /home/$user/.ssh/authorized_keys
             fi
         else
-            cp ~/docker-laravel/key/id_rsa.pub /home/$user/.ssh/authorized_keys
+            cp /docker-laravel/key/id_rsa.pub /home/$user/.ssh/authorized_keys
     fi
 
     sudo chown -R $user:$group /home/$user
-    sudo chmod 700 ~/.ssh ~/.ssh/github
+    sudo chmod 700 /home/$user/.ssh /home/$user/.ssh/github
 
     usermod -aG sudo $user
     usermod -aG www-data $user
@@ -91,26 +91,25 @@ then
 
     # Add private key for repo
 
-    if [ -f ~/.ssh/github/id_rsa ]
-        then
-            if [ ! -s ~/.ssh/github/id_rsa ]
-                then
-                    sudo rm -f ~/.ssh/github/id_rsa
-            fi
-    fi
+#    if [ -f ~/.ssh/github/id_rsa ]
+#        then
+#            if [ ! -s ~/.ssh/github/id_rsa ]
+#                then
+#                    sudo rm -f ~/.ssh/github/id_rsa
+#            fi
+#    fi
 
-    if   [ -f ~/docker-laravel/key/id_rsa ] && [ ! -f ~/.ssh/github/id_rsa ] 
+    if   [ -f /docker-laravel/key/id_rsa ]
         then    
-            if [ -s ~/docker-laravel/key/id_rsa ]
+            if [ -s /docker-laravel/key/id_rsa ]
                 then
-                    sudo cp -f ~/docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
-                    sudo cp -f ~/docker-laravel/key/id_rsa /home/$user/.ssh/github/id_rsa
-                    rm ~/docker-laravel/key/id_rsa
+                    sudo cp -f /docker-laravel/key/id_rsa ~/.ssh/github/id_rsa
+                    sudo cp -f /docker-laravel/key/id_rsa /home/$user/.ssh/github/id_rsa
                 else
-                    echo "Private key file ~/docker-laravel/key/id_rsa is empty"
+                    echo "Private key file /docker-laravel/key/id_rsa is empty"
             fi
         else
-            echo "Not found file private key in ~/docker-laravel/key/id_rsa"
+            echo "Not found file private key in /docker-laravel/key/id_rsa"
     fi
 
     if [ -f ~/.ssh/github/id_rsa ]
@@ -174,7 +173,7 @@ EOF
     domainname="$name$domain"
     echo $domainname
 
-    cd ~/docker-laravel/scripts
+    cd /docker-laravel/scripts
 
     sudo sed -i "s/localhost.localdomain/$domainname/" ../init/docker-compose.yml
     sudo sed -i "s/localhost.localdomain/$domainname/" ../init/nginx/nginx-config
@@ -183,9 +182,9 @@ EOF
     sudo sed -i "s/localhost.localdomain/$domainname/" ../php-fpm/dockerfile
     sudo sed -i "s/localhost.localdomain/$domainname/" ../docker-compose.yml
 
-    cd ~/docker-laravel/init
+    cd /docker-laravel/init
 
-    if [ ! -d ~/docker-laravel/certbot ]
+    if [ ! -d /docker-laravel/certbot ]
         then
             sudo docker-compose up -d
             while [ -z $(sudo docker ps -a -q  --filter "status=exited" --filter "name=certbot_init") ]
@@ -200,7 +199,7 @@ EOF
             cp -r ./certbot ../certbot
     fi
 
-    cd ~/docker-laravel/
+    cd /docker-laravel/
     #cp ~/.env ~/docker-laravel/php-fpm
     if [ -n "$(sudo docker ps -a -q)" ]
         then
@@ -214,14 +213,14 @@ EOF
 
     sudo docker-compose up -d
 
-    cd ~/docker-laravel/nginx/public/laravel
-    if [ ! -d ~/docker-laravel/nginx/public/laravel/public ]
+    cd /docker-laravel/nginx/public/laravel
+    if [ ! -d /docker-laravel/nginx/public/laravel/public ]
         then
             git init
             git pull git@github.com:Hirrus-dev/laravel.git 6.x
     fi
 
-    cd ~/docker-laravel/nginx/public
+    cd /docker-laravel/nginx/public
     sudo chown -R www-data:www-data ./laravel
     sudo chmod 775 -R ./laravel
     sudo docker exec -it php bash -c "cp /.env /var/www/$domainname/laravel/.env"
