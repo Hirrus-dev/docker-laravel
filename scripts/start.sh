@@ -230,4 +230,5 @@ EOF
     sudo chmod 775 -R ./laravel
     sudo docker exec -it php bash -c "cp /.env /var/www/$domainname/laravel/.env"
     sudo docker exec -it php bash -c "composer update --no-scripts -d /var/www/$domainname/laravel/"
+    sudo docker exec -it php bash -c "php artisan migrate"
 fi
