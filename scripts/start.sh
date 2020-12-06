@@ -60,6 +60,11 @@ then
 
     sudo apt update && apt upgrade -y
 
+    if [ -z $(which git) ]
+        then
+            sudo apt install -y git
+    fi
+    
     if [ -z $(which containerd) ]
         then
             sudo apt install -y containerd
