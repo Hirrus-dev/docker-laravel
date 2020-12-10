@@ -15,6 +15,7 @@ RUN apt-get update && \
         git \
         cron \
         nano \
+        sudo \
         libxml2-dev
 
 # Install soap extention
