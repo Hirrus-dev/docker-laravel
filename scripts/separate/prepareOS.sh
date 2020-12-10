@@ -185,11 +185,11 @@ EOF
     sudo sed -i "s/MYSQL_PASSWORD:.*/MYSQL_PASSWORD: $mysql_user_pass/" /docker-laravel/docker-compose.yml
     sudo sed -i "s/MYSQL_DATABASE:.*/MYSQL_DATABASE: $mysql_db_name/" /docker-laravel/docker-compose.yml
 
-    sudo sed -i "s/DB_HOST=.*/DB_HOST=db/" $env_file
-    sudo sed -i "s/DB_DATABASE=.*/DB_DATABASE=$mysql_db_name/" $env_file
-    sudo sed -i "s/DB_USERNAME=.*/DB_USERNAME=$mysql_user/" $env_file
-    sudo sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$mysql_user_pass/" $env_file
-
+    sudo cp -f  $env_file /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_HOST=.*/DB_HOST=db/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_DATABASE=.*/DB_DATABASE=$mysql_db_name/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_USERNAME=.*/DB_USERNAME=$mysql_user/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$mysql_user_pass/" /docker-laravel/php-fpm/.env
 
 
 fi
