@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. config.sh 
+. /docker-laravel/scripts/separate/config.sh 
 
 if [ $# -eq 1 ]
 then

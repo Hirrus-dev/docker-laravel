@@ -1,5 +1,5 @@
 #!/bin/bash
-    . config.sh
+    . /docker-laravel/scripts/separate/config.sh
     
     cd /docker-laravel/nginx/public/laravel
     sudo rm -rf /docker-laravel/nginx/public/laravel/*

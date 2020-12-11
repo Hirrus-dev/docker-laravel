@@ -2,10 +2,10 @@
 
 if [ $# -eq 1 ]
 then
-    sudo ./prepareOS.sh $1
-    sudo ./getFirstCert.sh
-    sudo ./cleanDocker.sh
-    sudo ./startDocker.sh
-    sudo ./copyProject.sh
-    sudo .configProject.sh $1
+    sudo /docker-laravel/scripts/separate/prepareOS.sh $1
+    sudo /docker-laravel/scripts/separate/getFirstCert.sh
+    sudo /docker-laravel/scripts/separate/cleanDocker.sh
+    sudo /docker-laravel/scripts/separate/startDocker.sh
+    sudo /docker-laravel/scripts/separate/copyProject.sh
+    sudo /docker-laravel/scripts/separate/configProject.sh $1
 fi
