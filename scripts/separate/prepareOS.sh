@@ -165,7 +165,7 @@ EOF
     
 
     #10 Change ssh port
-    #sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config
+    sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config
     sudo systemctl restart sshd
 
     domainname="$name$domain"
