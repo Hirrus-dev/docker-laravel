@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . config.sh 
-echo $git_key
+
 if [ $# -eq 1 ]
 then
 

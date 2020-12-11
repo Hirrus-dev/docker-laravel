@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. separate/config.sh 
+
 if [ $# -eq 1 ]
 then
 
@@ -44,12 +46,12 @@ then
 
     if [ -f /home/$user/.ssh/authorized_keys ]
         then
-            if [ -z "$(grep  "$(cat /docker-laravel/ssh_keys/id_rsa.pub)" /home/$user/.ssh/authorized_keys)" ]
+            if [ -z "$(grep  "$(cat $ssh_key)" /home/$user/.ssh/authorized_keys)" ]
                 then
-                    cat /docker-laravel/ssh_keys/id_rsa.pub >> /home/$user/.ssh/authorized_keys
+                    cat $ssh_key >> /home/$user/.ssh/authorized_keys
             fi
         else
-            cp /docker-laravel/ssh_keys/id_rsa.pub /home/$user/.ssh/authorized_keys
+            cp $ssh_key /home/$user/.ssh/authorized_keys
     fi
 
     sudo chown -R $user:$group /home/$user
@@ -104,17 +106,17 @@ then
 #            fi
 #    fi
 
-    if   [ -f /docker-laravel/git_keys/id_rsa ]
+    if   [ -f $git_key ]
         then    
-            if [ -s /docker-laravel/git_keys/id_rsa ]
+            if [ -s $git_key ]
                 then
-                    sudo cp -f /docker-laravel/git_keys/id_rsa ~/.ssh/github/id_rsa
-                    sudo cp -f /docker-laravel/git_keys/id_rsa /home/$user/.ssh/github/id_rsa
+                    sudo cp -f $git_key ~/.ssh/github/id_rsa
+                    sudo cp -f $git_key /home/$user/.ssh/github/id_rsa
                 else
-                    echo "Private key file /docker-laravel/git_keys/id_rsa is empty"
+                    echo "Private key file $git_key is empty"
             fi
         else
-            echo "Not found file private key in /docker-laravel/git_keys/id_rsa"
+            echo "Not found file private key in $git_key"
     fi
 
     if [ -f ~/.ssh/github/id_rsa ]
@@ -163,29 +165,32 @@ EOF
     
 
     #10 Change ssh port
-    sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config
-    ##sed -i 's/#\?\(Port\s*\).*$/\1 50142/' /etc/ssh/sshd_config
+    #sudo sed -i "s/.*Port.*/Port $ssh_port/" /etc/ssh/sshd_config
     sudo systemctl restart sshd
-
-#30 для добавления ключа ssh необходимо скопировать свой публичный ключ в файл ~/.ssh/authorized_keys
-#35 для LEMP используются образы версий, указанные в файле docker-compose.yml
-#37 имя БД, Пользователь и пароль БД указваются в файле docker-compose.yml. Внешние подключения исключены,
-#   поскольку порты контейнера не пробрасываются наружу
-#40 для запуска контейнров используется скрипт в папке ./scripts/init-dockerfile.sh.
-#   Для смены имени сервера нужно поменять внутри скрипта имя переменной
-
 
     domainname="$name$domain"
     echo $domainname
 
     cd /docker-laravel/scripts
 
-    sudo sed -i "s/localhost.localdomain/$domainname/" ../init/docker-compose.yml
-    sudo sed -i "s/localhost.localdomain/$domainname/" ../init/nginx/nginx-config
+    sudo sed -i "s/localhost.localdomain/$domainname/" /docker-laravel/init/docker-compose.yml
+    sudo sed -i "s/localhost.localdomain/$domainname/" /docker-laravel/init/nginx/nginx-config
 
-    sudo sed -i "s/localhost.localdomain/$domainname/" ../nginx/nginx-config
-    sudo sed -i "s/localhost.localdomain/$domainname/" ../php-fpm/dockerfile
-    sudo sed -i "s/localhost.localdomain/$domainname/" ../docker-compose.yml
+    sudo sed -i "s/localhost.localdomain/$domainname/" /docker-laravel/nginx/nginx-config
+    sudo sed -i "s/localhost.localdomain/$domainname/" /docker-laravel/php-fpm/dockerfile
+    sudo sed -i "s/localhost.localdomain/$domainname/" /docker-laravel/docker-compose.yml
+
+    sudo sed -i "s/MYSQL_ROOT_PASSWORD:.*/MYSQL_ROOT_PASSWORD: $mysql_root_pass/" /docker-laravel/docker-compose.yml
+    sudo sed -i "s/MYSQL_USER:.*/MYSQL_USER: $mysql_user/" /docker-laravel/docker-compose.yml
+    sudo sed -i "s/MYSQL_PASSWORD:.*/MYSQL_PASSWORD: $mysql_user_pass/" /docker-laravel/docker-compose.yml
+    sudo sed -i "s/MYSQL_DATABASE:.*/MYSQL_DATABASE: $mysql_db_name/" /docker-laravel/docker-compose.yml
+
+    sudo cp -f  $env_file /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_HOST=.*/DB_HOST=db/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_DATABASE=.*/DB_DATABASE=$mysql_db_name/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_USERNAME=.*/DB_USERNAME=$mysql_user/" /docker-laravel/php-fpm/.env
+    sudo sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$mysql_user_pass/" /docker-laravel/php-fpm/.env
+
 
     cd /docker-laravel/init
 
@@ -219,10 +224,11 @@ EOF
     sudo docker-compose up -d
 
     cd /docker-laravel/nginx/public/laravel
+    sudo rm -rf /docker-laravel/nginx/public/laravel/*
     if [ ! -d /docker-laravel/nginx/public/laravel/public ]
         then
             git init
-            git pull git@github.com:Hirrus-dev/laravel.git 6.x
+            git pull $git_project
     fi
 
     cd /docker-laravel/nginx/public
@@ -231,5 +237,7 @@ EOF
     sudo docker exec -it php bash -c "cp /.env /var/www/$domainname/laravel/.env"
     sudo docker exec -it php bash -c "composer update --no-scripts -d /var/www/$domainname/laravel/"
     sudo docker exec -it php bash -c "php artisan migrate"
-    sudo crontab -l | { cat; echo "*/1 * * * * docker exec php bash -c \"cd /vaw/www/$domainname && sudo -u www-data artisan shedule:run\""; } | sudo crontab -
+    croncmd="docker exec php bash -c \"cd /var/www/$domainname/laravel/ && sudo -u www-data php artisan schedule:run > /dev/null 2>&1\""
+    cronjob="*/1 * * * * $croncmd"
+    ( sudo crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | sudo crontab -
 fi
