@@ -8,7 +8,7 @@ then
     sudo docker exec -it php bash -c "cp /.env /var/www/$domainname/laravel/.env"
     sudo docker exec -it php bash -c "composer update --no-scripts -d /var/www/$domainname/laravel/"
     sudo docker exec -it php bash -c "php artisan migrate"
-        croncmd="docker exec php bash -c \"cd /var/www/$domainname && sudo -u www-data php artisan schedule:run >> /dev/null 1>&1\""
-        cronjob="*/1 * * * * $croncmd"
-        ( sudo crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | sudo crontab -
+    croncmd="docker exec php bash -c \"cd /var/www/$domainname/laravel/ && sudo -u www-data php artisan schedule:run > /dev/null 2>&1\""
+    cronjob="*/1 * * * * $croncmd"
+    ( sudo crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | sudo crontab -
 fi
